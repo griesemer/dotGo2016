@@ -38,6 +38,16 @@ func main() {
 	// rewrite operator method names
 	ast.Apply(file, func(parent ast.Node, name string, index int, n ast.Node) bool {
 		switch n := n.(type) {
+		case *ast.InterfaceType:
+			for _, m := range n.Methods.List {
+				// Correct ASTs can only have one method name here (len(m.Names) == 1),
+				// but there's no cost in just iterating anyway since we have a list.
+				for _, ident := range m.Names {
+					if name, ok := methName[ident.Name]; ok {
+						ident.Name = name
+					}
+				}
+			}
 		case *ast.FuncDecl:
 			if n.Recv != nil {
 				if name, ok := methName[n.Name.Name]; ok {
