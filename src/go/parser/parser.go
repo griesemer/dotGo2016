@@ -542,6 +542,21 @@ func (p *parser) parseIdent() *ast.Ident {
 	return &ast.Ident{NamePos: pos, Name: name}
 }
 
+func (p *parser) parseIdentOrPlus() *ast.Ident {
+	pos := p.pos
+	name := "_"
+	if p.tok == token.IDENT {
+		name = p.lit
+		p.next()
+	} else if p.tok == token.ADD {
+		name = "+"
+		p.next()
+	} else {
+		p.expect(token.IDENT) // use expect() error handling
+	}
+	return &ast.Ident{NamePos: pos, Name: name}
+}
+
 func (p *parser) parseIdentList() (list []*ast.Ident) {
 	if p.trace {
 		defer un(trace(p, "IdentList"))
@@ -2380,7 +2395,7 @@ func (p *parser) parseFuncDecl() *ast.FuncDecl {
 		recv = p.parseParameters(scope, false)
 	}
 
-	ident := p.parseIdent()
+	ident := p.parseIdentOrPlus()
 
 	params, results := p.parseSignature(scope)
 
