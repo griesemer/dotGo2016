@@ -947,17 +947,28 @@ func (p *parser) parseMethodSpec(scope *ast.Scope) *ast.Field {
 	doc := p.leadComment
 	var idents []*ast.Ident
 	var typ ast.Expr
-	x := p.parseTypeName()
-	if ident, isIdent := x.(*ast.Ident); isIdent && p.tok == token.LPAREN {
-		// method
+	if p.tok == token.ADD {
+		// + operator method
+		// TODO(gri) could try to factor out this code and the code for regular
+		//           method names below
+		ident := p.parseIdentOrPlus()
 		idents = []*ast.Ident{ident}
 		scope := ast.NewScope(nil) // method scope
 		params, results := p.parseSignature(scope)
 		typ = &ast.FuncType{Func: token.NoPos, Params: params, Results: results}
 	} else {
-		// embedded interface
-		typ = x
-		p.resolve(typ)
+		x := p.parseTypeName()
+		if ident, isIdent := x.(*ast.Ident); isIdent && p.tok == token.LPAREN {
+			// method
+			idents = []*ast.Ident{ident}
+			scope := ast.NewScope(nil) // method scope
+			params, results := p.parseSignature(scope)
+			typ = &ast.FuncType{Func: token.NoPos, Params: params, Results: results}
+		} else {
+			// embedded interface
+			typ = x
+			p.resolve(typ)
+		}
 	}
 	p.expectSemi() // call before accessing p.linecomment
 
@@ -976,7 +987,7 @@ func (p *parser) parseInterfaceType() *ast.InterfaceType {
 	lbrace := p.expect(token.LBRACE)
 	scope := ast.NewScope(nil) // interface scope
 	var list []*ast.Field
-	for p.tok == token.IDENT {
+	for p.tok == token.IDENT || p.tok == token.ADD {
 		list = append(list, p.parseMethodSpec(scope))
 	}
 	rbrace := p.expect(token.RBRACE)

@@ -1002,3 +1002,8 @@ func _(struct {
 
 // + operator as method name
 func (T) + (T) T
+
+// + operator as interface method name
+type T interface {
+	+(T) T
+}
