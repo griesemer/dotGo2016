@@ -287,7 +287,7 @@ type (
 	IndexExpr struct {
 		X      Expr      // expression
 		Lbrack token.Pos // position of "["
-		Index  Expr      // index expression
+		Index  []Expr    // index expressions
 		Rbrack token.Pos // position of "]"
 	}
 

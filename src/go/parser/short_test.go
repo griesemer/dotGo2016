@@ -60,6 +60,8 @@ var valids = []string{
 	`package p; type T interface{ % (T) T }`,
 	`package p; type T interface{ [] (int) E }`,
 	`package p; type T interface{ []= (int, E) }`,
+	`package p; var _ = a[i, j, k]`,
+	`package p; func _() { a[i, j, k] = x }`,
 }
 
 func TestValid(t *testing.T) {

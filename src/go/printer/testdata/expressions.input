@@ -731,3 +731,15 @@ func _() {
 	},
 	)
 }
+
+// extended indexing operators
+func _() {
+	_ = a[i]
+	_ = a[i, j]
+	_ = a[i, j, k]
+	_ = a[i, j, k, l]
+	a[i] = x
+	a[i, j] = x
+	a[i, j, k] = x
+	a[i, j, k, l] = x
+}

@@ -454,7 +454,7 @@ func (f *File) newCounter(start, end token.Pos, numStmt int) ast.Stmt {
 			X:   ast.NewIdent(*varVar),
 			Sel: ast.NewIdent("Count"),
 		},
-		Index: f.index(),
+		Index: []ast.Expr{f.index()},
 	}
 	stmt := counterStmt(f, counter)
 	f.blocks = append(f.blocks, Block{start, end, numStmt})

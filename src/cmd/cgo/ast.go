@@ -328,7 +328,7 @@ func (f *File) walk(x interface{}, context string, visit func(*File, interface{}
 		f.walk(&n.X, "selector", visit)
 	case *ast.IndexExpr:
 		f.walk(&n.X, "expr", visit)
-		f.walk(&n.Index, "expr", visit)
+		f.walk(n.Index, "expr", visit)
 	case *ast.SliceExpr:
 		f.walk(&n.X, "expr", visit)
 		if n.Low != nil {

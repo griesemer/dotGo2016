@@ -143,6 +143,9 @@ func indexes() {
 	ms = "foo" /* ERROR "cannot use .* in assignment" */ [1:2]
 	ms = "foo" /* ERROR "cannot use .* in assignment" */ [i:j]
 	_, _ = ss, ms
+
+	// extended index expressions - not supported
+	_ = "foo"[i, j /* ERROR "more than one index not supported" */ ]
 }
 
 type T struct {

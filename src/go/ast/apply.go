@@ -145,7 +145,7 @@ func (a *application) apply(parent Node, name string, index int, n Node) {
 
 	case *IndexExpr:
 		a.apply(n, "X", -1, n.X)
-		a.apply(n, "Index", -1, n.Index)
+		a.applyExprList(n, "Index", n.Index)
 
 	case *SliceExpr:
 		a.apply(n, "X", -1, n.X)

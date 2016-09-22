@@ -1179,6 +1179,11 @@ func (check *Checker) exprInternal(x *operand, e ast.Expr, hint Type) exprKind {
 			goto Error
 		}
 
+		if len(e.Index) > 1 {
+			check.errorf(e.Index[1].Pos(), "more than one index not supported")
+			goto Error
+		}
+
 		valid := false
 		length := int64(-1) // valid if >= 0
 		switch typ := x.typ.Underlying().(type) {
@@ -1218,7 +1223,7 @@ func (check *Checker) exprInternal(x *operand, e ast.Expr, hint Type) exprKind {
 
 		case *Map:
 			var key operand
-			check.expr(&key, e.Index)
+			check.expr(&key, e.Index[0])
 			check.assignment(&key, typ.key, "map index")
 			if x.mode == invalid {
 				goto Error
@@ -1239,7 +1244,7 @@ func (check *Checker) exprInternal(x *operand, e ast.Expr, hint Type) exprKind {
 			goto Error
 		}
 
-		check.index(e.Index, length)
+		check.index(e.Index[0], length)
 		// ok to continue
 
 	case *ast.SliceExpr:

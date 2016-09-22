@@ -1247,28 +1247,44 @@ func (p *parser) parseIndexOrSlice(x ast.Expr) ast.Expr {
 		defer un(trace(p, "IndexOrSlice"))
 	}
 
-	const N = 3 // change the 3 to 2 to disable 3-index slices
 	lbrack := p.expect(token.LBRACK)
 	p.exprLev++
-	var index [N]ast.Expr
-	var colons [N - 1]token.Pos
+
+	var index []ast.Expr
 	if p.tok != token.COLON {
-		index[0] = p.parseRhs()
-	}
-	ncolons := 0
-	for p.tok == token.COLON && ncolons < len(colons) {
-		colons[ncolons] = p.pos
-		ncolons++
-		p.next()
-		if p.tok != token.COLON && p.tok != token.RBRACK && p.tok != token.EOF {
-			index[ncolons] = p.parseRhs()
+		index = append(index, p.parseRhs())
+		for p.tok == token.COMMA {
+			p.next()
+			index = append(index, p.parseRhs())
 		}
 	}
+
+	const N = 3 // change the 3 to 2 to disable 3-index slices
+	var colons [N - 1]token.Pos
+	ncolons := 0
+	if len(index) <= 1 {
+		// possibly a slice expression
+		for p.tok == token.COLON && ncolons < len(colons) {
+			colons[ncolons] = p.pos
+			ncolons++
+			p.next()
+			if len(index) < ncolons {
+				index = append(index, nil)
+			}
+			if p.tok != token.COLON && p.tok != token.RBRACK && p.tok != token.EOF {
+				index = append(index, p.parseRhs())
+			}
+		}
+	}
+
 	p.exprLev--
 	rbrack := p.expect(token.RBRACK)
 
 	if ncolons > 0 {
 		// slice expression
+		for len(index) < N {
+			index = append(index, nil)
+		}
 		slice3 := false
 		if ncolons == 2 {
 			slice3 = true
@@ -1286,7 +1302,7 @@ func (p *parser) parseIndexOrSlice(x ast.Expr) ast.Expr {
 		return &ast.SliceExpr{X: x, Lbrack: lbrack, Low: index[0], High: index[1], Max: index[2], Slice3: slice3, Rbrack: rbrack}
 	}
 
-	return &ast.IndexExpr{X: x, Lbrack: lbrack, Index: index[0], Rbrack: rbrack}
+	return &ast.IndexExpr{X: x, Lbrack: lbrack, Index: index, Rbrack: rbrack}
 }
 
 func (p *parser) parseCallOrConversion(fun ast.Expr) *ast.CallExpr {
