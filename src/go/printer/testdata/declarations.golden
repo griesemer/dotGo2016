@@ -987,33 +987,33 @@ func _(struct {
 })	// no extra comma between } and )
 
 // operator methods
-func (T) +(T) T
-func (T) -(T) T
-func (T) *(T) T
-func (T) /(T) T
-func (T) %(T) T
-func (T) [](int) E
-func (T) []=(int, E)
+func (T) + (T) T
+func (T) - (T) T
+func (T) * (T) T
+func (T) / (T) T
+func (T) % (T) T
+func (T) [] (int) E
+func (T) []= (int, E)
 
 // operator methods in interfaces
 type T interface {
-	+(T) T
+	+ (T) T
 }
 type T interface {
-	-(T) T
+	- (T) T
 }
 type T interface {
-	*(T) T
+	* (T) T
 }
 type T interface {
-	/(T) T
+	/ (T) T
 }
 type T interface {
-	%(T) T
+	% (T) T
 }
 type T interface {
-	[](int) E
+	[] (int) E
 }
 type T interface {
-	[]=(int, E)
+	[]= (int, E)
 }

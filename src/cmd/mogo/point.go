@@ -12,12 +12,12 @@ type Point struct {
 	X, Y int
 }
 
-func (a Point) +(b Point) Point {
+func (a Point) + (b Point) Point {
 	return Point{a.X + b.X, a.Y + b.Y}
 }
 
 type Adder interface {
-	+(Point) Point
+	+ (Point) Point
 }
 
 func main() {

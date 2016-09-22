@@ -26,12 +26,12 @@ func (x *underV) addr(i int) *T {
 
 type Vector underV
 
-func (x *Vector) Len() int       { return x.len }
-func (x *Vector) [](i int) T     { return *(*underV)(x).addr(i) }
-func (x *Vector) []=(i int, t T) { *(*underV)(x).addr(i) = t }
+func (x *Vector) Len() int        { return x.len }
+func (x *Vector) [] (i int) T     { return *(*underV)(x).addr(i) }
+func (x *Vector) []= (i int, t T) { *(*underV)(x).addr(i) = t }
 
 // dot-product
-func (x *Vector) *(y *Vector) T {
+func (x *Vector) * (y *Vector) T {
 	if x.Len() != y.Len() {
 		panic("incompatible vector lengths")
 	}
@@ -58,9 +58,9 @@ func (m *underM) addr(i, j int) *T {
 	return &m.array[i*m.stride[0]+j*m.stride[1]]
 }
 
-func (m *Matrix) Len() (int, int)   { return m.len[0], m.len[1] }
-func (m *Matrix) [](i, j int) T     { return *(*underM)(m).addr(i, j) }
-func (m *Matrix) []=(i, j int, x T) { *(*underM)(m).addr(i, j) = x }
+func (m *Matrix) Len() (int, int)    { return m.len[0], m.len[1] }
+func (m *Matrix) [] (i, j int) T     { return *(*underM)(m).addr(i, j) }
+func (m *Matrix) []= (i, j int, x T) { *(*underM)(m).addr(i, j) = x }
 
 func (m *Matrix) Row(i int) *Vector { return &Vector{m.array[i*m.stride[0]:], m.len[1], m.stride[1]} }
 func (m *Matrix) Col(j int) *Vector { return &Vector{m.array[j*m.stride[1]:], m.len[0], m.stride[0]} }
@@ -109,7 +109,7 @@ func (a *Matrix) Print() {
 	fmt.Println()
 }
 
-func (a *Matrix) *(b *Matrix) *Matrix {
+func (a *Matrix) * (b *Matrix) *Matrix {
 	n, m := a.Len()
 	o, p := b.Len()
 	if m != o {

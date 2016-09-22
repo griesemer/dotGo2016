@@ -485,6 +485,9 @@ func (p *printer) fieldList(fields *ast.FieldList, isStruct, isIncomplete bool) 
 			if ftyp, isFtyp := f.Type.(*ast.FuncType); isFtyp {
 				// method
 				p.expr(f.Names[0])
+				if isSpecial(f.Names[0].Name) {
+					p.print(blank) // extra blank after operator method names
+				}
 				p.signature(ftyp.Params, ftyp.Results)
 			} else {
 				// embedded interface
@@ -1612,8 +1615,20 @@ func (p *printer) funcDecl(d *ast.FuncDecl) {
 		p.print(blank)
 	}
 	p.expr(d.Name)
+	if isSpecial(d.Name.Name) {
+		p.print(blank) // extra blank after operator method names
+	}
 	p.signature(d.Type.Params, d.Type.Results)
 	p.adjBlock(p.distanceFrom(d.Pos()), vtab, d.Body)
+}
+
+func isSpecial(name string) bool {
+	for _, r := range name {
+		if (r < '0' || '9' < r && r < 'A' || 'Z' < r && r < 'a' || 'z' < r) && r != '_' {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *printer) decl(decl ast.Decl) {
