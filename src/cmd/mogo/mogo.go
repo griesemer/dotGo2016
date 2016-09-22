@@ -66,16 +66,37 @@ func main() {
 			break
 		}
 		progress = false
-		ast.Apply(file, nil, func(parent ast.Node, name string, index int, n ast.Node) bool {
-			switch n := n.(type) {
-			case *ast.BinaryExpr:
-				if r := rewrite(pkg, tmap, n.X, n.Op.String(), n.Y); r != nil {
+		ast.Apply(file,
+			func(parent ast.Node, name string, index int, n ast.Node) bool {
+				switch n := n.(type) {
+				case *ast.AssignStmt:
+					if len(n.Lhs) != 1 || len(n.Rhs) != 1 {
+						break // cannot handle these cases yet
+					}
+					if lhs, ok := n.Lhs[0].(*ast.IndexExpr); ok {
+						if r := rewrite(pkg, tmap, lhs.X, "[]=", append(lhs.Index, n.Rhs[0])...); r != nil {
+							ast.SetField(parent, name, index, &ast.ExprStmt{r})
+							progress = true
+						}
+					}
+				}
+				return true
+			},
+			func(parent ast.Node, name string, index int, n ast.Node) bool {
+				var r *ast.CallExpr
+				switch n := n.(type) {
+				case *ast.IndexExpr:
+					r = rewrite(pkg, tmap, n.X, "[]", n.Index...)
+				case *ast.BinaryExpr:
+					r = rewrite(pkg, tmap, n.X, n.Op.String(), n.Y)
+				}
+				if r != nil {
 					ast.SetField(parent, name, index, r)
 					progress = true
 				}
-			}
-			return true
-		})
+				return true
+			},
+		)
 	}
 
 	// write AST
@@ -105,4 +126,12 @@ func rewrite(pkg *types.Package, tmap map[ast.Expr]types.TypeAndValue, recv ast.
 	return &ast.CallExpr{Fun: fun, Args: args}
 }
 
-var methName = map[string]string{"+": "ADD__"} // extend as desired
+var methName = map[string]string{
+	"+":   "ADD__",
+	"-":   "SUB__",
+	"*":   "MUL__",
+	"/":   "QUO__",
+	"%":   "REM__",
+	"[]":  "AT__",
+	"[]=": "SET__",
+}
