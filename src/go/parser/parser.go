@@ -542,15 +542,33 @@ func (p *parser) parseIdent() *ast.Ident {
 	return &ast.Ident{NamePos: pos, Name: name}
 }
 
-func (p *parser) parseIdentOrPlus() *ast.Ident {
+var validOperator = map[token.Token]bool{
+	token.ADD:    true,
+	token.SUB:    true,
+	token.MUL:    true,
+	token.QUO:    true,
+	token.REM:    true,
+	token.LBRACK: true,
+}
+
+func (p *parser) parseFuncName(operatorOk bool) *ast.Ident {
 	pos := p.pos
 	name := "_"
 	if p.tok == token.IDENT {
 		name = p.lit
 		p.next()
-	} else if p.tok == token.ADD {
-		name = "+"
+	} else if operatorOk && validOperator[p.tok] {
+		tok := p.tok
+		name = tok.String()
 		p.next()
+		if tok == token.LBRACK {
+			p.expect(token.RBRACK)
+			name = "[]"
+			if p.tok == token.ASSIGN {
+				name = "[]="
+				p.next()
+			}
+		}
 	} else {
 		p.expect(token.IDENT) // use expect() error handling
 	}
@@ -947,11 +965,11 @@ func (p *parser) parseMethodSpec(scope *ast.Scope) *ast.Field {
 	doc := p.leadComment
 	var idents []*ast.Ident
 	var typ ast.Expr
-	if p.tok == token.ADD {
-		// + operator method
+	if validOperator[p.tok] {
+		// operator method
 		// TODO(gri) could try to factor out this code and the code for regular
 		//           method names below
-		ident := p.parseIdentOrPlus()
+		ident := p.parseFuncName(true)
 		idents = []*ast.Ident{ident}
 		scope := ast.NewScope(nil) // method scope
 		params, results := p.parseSignature(scope)
@@ -987,7 +1005,7 @@ func (p *parser) parseInterfaceType() *ast.InterfaceType {
 	lbrace := p.expect(token.LBRACE)
 	scope := ast.NewScope(nil) // interface scope
 	var list []*ast.Field
-	for p.tok == token.IDENT || p.tok == token.ADD {
+	for p.tok == token.IDENT || validOperator[p.tok] {
 		list = append(list, p.parseMethodSpec(scope))
 	}
 	rbrace := p.expect(token.RBRACE)
@@ -2406,7 +2424,7 @@ func (p *parser) parseFuncDecl() *ast.FuncDecl {
 		recv = p.parseParameters(scope, false)
 	}
 
-	ident := p.parseIdentOrPlus()
+	ident := p.parseFuncName(recv != nil)
 
 	params, results := p.parseSignature(scope)
 

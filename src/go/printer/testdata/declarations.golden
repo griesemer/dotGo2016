@@ -986,10 +986,34 @@ func _(struct {
 	y	int
 })	// no extra comma between } and )
 
-// + operator as method name
+// operator methods
 func (T) +(T) T
+func (T) -(T) T
+func (T) *(T) T
+func (T) /(T) T
+func (T) %(T) T
+func (T) [](int) E
+func (T) []=(int, E)
 
-// + operator as interface method name
+// operator methods in interfaces
 type T interface {
 	+(T) T
+}
+type T interface {
+	-(T) T
+}
+type T interface {
+	*(T) T
+}
+type T interface {
+	/(T) T
+}
+type T interface {
+	%(T) T
+}
+type T interface {
+	[](int) E
+}
+type T interface {
+	[]=(int, E)
 }
