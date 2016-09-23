@@ -133,5 +133,5 @@ var methName = map[string]string{
 	"/":   "QUO__",
 	"%":   "REM__",
 	"[]":  "AT__",
-	"[]=": "SET__",
+	"[]=": "ATSET__",
 }
