@@ -40,6 +40,19 @@ func (x *Vector) * (y *Vector) T {
 	return t
 }
 
+func (x *Vector) GoSlice() []T {
+	if x.stride == 1 {
+		return x.array[:x.len]
+	}
+	s := make([]T, x.len)
+	j := 0
+	for i := range s {
+		s[i] = x.array[j]
+		j += x.stride
+	}
+	return s
+}
+
 type dim [2]int
 
 func (d dim) transpose() dim { return dim{d[1], d[0]} }
@@ -167,4 +180,13 @@ func main() {
 	c.Print()
 
 	c.Transpose().Print()
+
+	n, m := c.Len()
+	for i := 0; i < n; i++ {
+		fmt.Println(c.Row(i).GoSlice())
+	}
+
+	for j := 0; j < m; j++ {
+		fmt.Println(c.Col(j).GoSlice())
+	}
 }
