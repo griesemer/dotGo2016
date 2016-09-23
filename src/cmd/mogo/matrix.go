@@ -10,25 +10,23 @@ import "fmt"
 
 const boundsChecks = true
 
-type T float64
+type T float64 // for convenience
 
-type underV struct {
-	array       []T
+type Vector struct {
+	array       []T // may be longer than len
 	len, stride int
 }
 
-func (x *underV) addr(i int) *T {
+func (x *Vector) addr(i int) *T {
 	if boundsChecks && uint(i) >= uint(x.len) {
 		panic("index out of bounds")
 	}
 	return &x.array[i*x.stride]
 }
 
-type Vector underV
-
 func (x *Vector) Len() int        { return x.len }
-func (x *Vector) [] (i int) T     { return *(*underV)(x).addr(i) }
-func (x *Vector) []= (i int, t T) { *(*underV)(x).addr(i) = t }
+func (x *Vector) [] (i int) T     { return *x.addr(i) }
+func (x *Vector) []= (i int, t T) { *x.addr(i) = t }
 
 // dot-product
 func (x *Vector) * (y *Vector) T {
@@ -44,14 +42,14 @@ func (x *Vector) * (y *Vector) T {
 
 type dim [2]int
 
-type underM struct {
+func (d dim) transpose() dim { return dim{d[1], d[0]} }
+
+type Matrix struct {
 	array       []T
 	len, stride dim
 }
 
-type Matrix underM
-
-func (m *underM) addr(i, j int) *T {
+func (m *Matrix) addr(i, j int) *T {
 	if boundsChecks && uint(i) >= uint(m.len[0]) || uint(j) >= uint(m.len[1]) {
 		panic("index out of bounds")
 	}
@@ -59,8 +57,8 @@ func (m *underM) addr(i, j int) *T {
 }
 
 func (m *Matrix) Len() (int, int)    { return m.len[0], m.len[1] }
-func (m *Matrix) [] (i, j int) T     { return *(*underM)(m).addr(i, j) }
-func (m *Matrix) []= (i, j int, x T) { *(*underM)(m).addr(i, j) = x }
+func (m *Matrix) [] (i, j int) T     { return *m.addr(i, j) }
+func (m *Matrix) []= (i, j int, x T) { *m.addr(i, j) = x }
 
 func (m *Matrix) Row(i int) *Vector { return &Vector{m.array[i*m.stride[0]:], m.len[1], m.stride[1]} }
 func (m *Matrix) Col(j int) *Vector { return &Vector{m.array[j*m.stride[1]:], m.len[0], m.stride[0]} }
@@ -68,8 +66,8 @@ func (m *Matrix) Col(j int) *Vector { return &Vector{m.array[j*m.stride[1]:], m.
 func (a *Matrix) Transpose() *Matrix {
 	return &Matrix{
 		a.array,
-		dim{a.len[1], a.len[0]},
-		dim{a.stride[1], a.stride[0]},
+		a.len.transpose(),
+		a.stride.transpose(),
 	}
 }
 
